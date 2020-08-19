@@ -31,9 +31,9 @@ class HuaweiPush
      */
     public function __construct()
     {
-        $this->_clientId = config("huawei-push.APP_ID", "");
-        $this->_clientSecret = config("huawei-push.APP_SECRET", "");
-        $this->appPkgName = config("huawei-push.APP_PKG_NAME", "");
+        $this->_clientId = config("huawei-push.app_id", "");
+        $this->_clientSecret = config("huawei-push.app_secret", "");
+        $this->appPkgName = config("huawei-push.app_pkg_name", "");
 
         $this->_http = new Request();
         $this->_http->setHttpVersion(Http::HTTP_VERSION_1_1);
@@ -89,12 +89,12 @@ class HuaweiPush
         if (!$this->_accessTokenInfo) {
             $this->_accessTokenInfo = $this->getAccessTokenInfo();
         }
-        $access_token = "";
+        $expiresIn = "";
         if (isset($this->_accessTokenInfo['expires_in']) && $this->_accessTokenInfo['expires_in']) {
-            $access_token = $this->_accessTokenInfo['expires_in'];
+            $expiresIn = $this->_accessTokenInfo['expires_in'];
         }
 
-        return $access_token;
+        return $expiresIn;
     }
 
     /**
