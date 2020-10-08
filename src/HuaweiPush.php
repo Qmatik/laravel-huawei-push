@@ -18,10 +18,10 @@ class HuaweiPush
     private $AccessToken;
     private $appPkgName;
 
-    /**@var  $response Response **/
+    /**@var  $response Response * */
     private $response;
     private $Customize;
-    private $intent; //开发者可以自定义Intent，用户收到通知栏消息后点击通知栏消息打开应用定义的这个Intent页面
+    private $intent; //Разработчики могут настроить намерение. После того, как пользователь получит сообщение панели уведомлений, щелкните сообщение панели уведомлений, чтобы открыть страницу намерения, определяемую приложением.
 
     /**
      * 构造函数。
@@ -198,25 +198,25 @@ class HuaweiPush
         }
         array_filter($deviceToken);
         if (count($deviceToken) <= 0) {
-            throw new \Exception("华为推送必须要设置deviceToken");
+            throw new \Exception("Huawei push must set deviceToken");
         }
         if (!$_clientId) {
-            throw new \Exception("华为推送必须要设置clientId");
+            throw new \Exception("Huawei push must set clientId");
         }
         if (!$_clientSecret) {
-            throw new \Exception("华为推送必须要设置clientSecret");
+            throw new \Exception("Huawei push must set clientSecret");
         }
         if (!$title) {
-            throw new \Exception("华为推送必须要设置title");
+            throw new \Exception("Huawei push must set title");
         }
         if (!$message) {
-            throw new \Exception("华为推送必须要设置message");
+            throw new \Exception("Huawei push must set message");
         }
         if (!$AccessToken) {
-            throw new \Exception("华为推送必须要设置AccessToken");
+            throw new \Exception("Huawei push must set AccessToken");
         }
         if (!$appPkgName) {
-            throw new \Exception("华为推送必须要设置appPkgName");
+            throw new \Exception("Huawei push must set appPkgName");
         }
 
         $this->_clientId = $_clientId;
@@ -239,7 +239,8 @@ class HuaweiPush
     }
 
     /**
-     * 发送华为推送消息。
+     * Send Huawei push messages.
+     *
      * @param $deviceToken
      * @param $title
      * @param $message
@@ -249,59 +250,43 @@ class HuaweiPush
     public function sendMessage()
     {
         $this->check();
-        // 构建 Payload
-        $message = $this->message;
-        $title = $this->title;
 
         $array = [
-            'hps' => [
-                'msg' => [
-                    'type' => 3,
-                    'body' => [
-                        'content' => $message,
-                        'title' => $title
-                    ],
-                    'action' => [
-                        'type' => 3,
-                        'param' => [
-                            'appPkgName' => $this->appPkgName
-                        ]
+            "validate_only" => false,
+            "message" => [
+                "token" => $this->deviceToken,
+                "android" => [
+                    "notification" => [
+                        "title" => $this->title,
+                        "body" => $this->message,
+                        "click_action" => [
+                            "type" => 3,
+                        ],
                     ]
                 ]
-            ]
-        ];
+            ]];
 
         if (is_array($this->Customize) && count($this->Customize) > 0) {
-            if ($this->isDictArray($this->Customize)) {
+            $array['message']['android']['data'] = json_encode(['custom' => $this->Customize]);
+            /*if ($this->isDictArray($this->Customize)) {
                 $array["hps"]["ext"] = ["customize" => [$this->Customize]];
             } else {
                 $array["hps"]["ext"] = ["customize" => $this->Customize];
-            }
+            } */
         }
-        if (is_string($this->Customize) && trim($this->Customize) != "") {
-            $array["hps"]["ext"] = [
-                "customize" => [trim($this->Customize)]
-            ];
-        }
-        if (is_string($this->intent) && trim($this->intent) != "") {
+
+        /*if (is_string($this->intent) && trim($this->intent) != "") {
             $array["hps"]["msg"]['action']['param']['intent'] = trim($this->intent);
             $array["hps"]["msg"]['action']['type'] = 1;
         }
-        $payload = json_encode($array, JSON_UNESCAPED_UNICODE);
+        $payload = json_encode($array, JSON_UNESCAPED_UNICODE); */
 
 
-
-        $response = $this->_http->post('https://api.push.hicloud.com/pushsend.do', [
-            'query' => [
-                'nsp_ctx' => json_encode(['ver' => '1', 'appId' => $this->_clientId])
+        $response = $this->_http->post("https://push-api.cloud.huawei.com/v1/{$this->_clientId}/messages:send", [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->AccessToken,
             ],
-            'data' => [
-                'access_token' => $this->AccessToken,
-                'nsp_ts' => time(),
-                'nsp_svc' => 'openpush.message.api.send',
-                'device_token_list' => json_encode($this->deviceToken),
-                'payload' => $payload
-            ]
+            'data' => json_encode($array),
         ]);
         $this->response = $response;
 
