@@ -227,7 +227,7 @@ class HuaweiPush
         $this->appPkgName = $appPkgName;
     }
 
-    private function isDictArray($array = array())
+    /*private function isDictArray($array = array())
     {
         if (!is_array($array) && count($array) > 0) {
             return false;
@@ -236,7 +236,7 @@ class HuaweiPush
             return true;
         }
         return false;
-    }
+    } */
 
     /**
      * Send Huawei push messages.
